@@ -15,11 +15,11 @@ namespace myList {
 			DNode* nextPtr;
 			DNode* prevPtr;
 
-			DNode() : data(0), nextPtr(nullptr), prevPtr(nullptr) {}
+			DNode() : data(), nextPtr(nullptr), prevPtr(nullptr) {}
 
 
 			// Constructor
-			DNode(const ItemType& data_item, DNode* prev, DNode* next) :
+			DNode(const ItemType& data_item, DNode* prev = nullptr, DNode* next = nullptr) :
 				data(data_item),
 				prevPtr(prev),
 				nextPtr(next) {}
@@ -221,16 +221,31 @@ namespace myList {
 		iterator erase(iterator pos) {
 			cout << "erase node at pos\n";
 			//special case 1: the list is empty
-
+			if (empty()) {
+				throw exception("No Elements in the list\n");
+			}
 
 			//special case 2: points to the end of the list
-
+			if (pos == nullptr) {
+				throw exception("Invalid Pointer\n");
+			}
 
 			// Create an iterator that references the position following pos.
 			iterator return_value = pos;
-
+			++return_value;
 			// Check for special cases.
-			
+			if (this->head == pos.current) {
+				popFront();
+			}
+			else if (this->tail == pos.current) {
+				popBack();
+			}
+			else {
+				// ‘normal’ erase
+				pos.current->prevPtr->nextPtr = pos.current->nextPtr;
+				pos.current->nextPtr->prevPtr = pos.current->prevPtr;
+				delete pos.current;
+			}
 			return return_value;
 			
 		}
@@ -245,13 +260,23 @@ namespace myList {
 			cout << "insert node in front of pos\n";
 
 			//pos is set to headptr or list is empty
-
+			if (pos.current == this->head || this->head == nullptr) {
+				pushFront(newValue);
+				return iterator(head);
+			}
 
 			//pos is set to nullptr
-
+			if (pos.current == nullptr) {
+				pushBack(newValue);
+				return iterator(tail);
+			}
 
 			// otherwise, creates the node & adjusts prev & next pointers
-			DNode* newItem = new DNode;
+			DNode* newItem = new DNode(newValue);
+			newItem->nextPtr = pos.current;
+			newItem->prevPtr = pos.current->prevPtr;
+			pos.current->prevPtr->nextPtr = newItem;
+			pos.current->prevPtr = newItem;
 
 			return iterator(newItem);
 		}
